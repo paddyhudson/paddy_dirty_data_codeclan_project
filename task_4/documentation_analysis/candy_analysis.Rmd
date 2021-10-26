@@ -1,0 +1,99 @@
+---
+title: "Candy Analysis"
+output: html_notebook
+---
+
+```{r}
+library(tidyverse)
+library(here)
+```
+
+```{r}
+candy <- read_csv(
+  file = here("clean_data/candy_clean.csv"),
+  col_types = cols(
+    age = col_double(),
+    going_out = col_character(),
+    country = col_character(),
+    year = col_double(),
+    gender = col_character(),
+    candy = col_character(),
+    rating = col_character()
+  )
+)
+```
+
+#Q1
+
+```{r}
+candy %>% 
+  select(rating) %>% 
+  drop_na() %>%
+  count()
+```
+
+#Q2
+
+```{r}
+candy %>% 
+  group_by(going_out) %>% 
+  summarise(avg_age = mean(age, na.rm = TRUE))
+```
+
+#Q3
+```{r}
+candy %>% 
+  drop_na(rating) %>% 
+  group_by(rating, candy) %>% 
+  summarise(count = n(), .groups = "drop") %>% 
+  group_by(rating) %>% 
+  slice_max(count)
+```
+
+#Q4
+```{r}
+candy %>% 
+  filter(candy == "starburst" & rating == "DESPAIR") %>% 
+  count()
+```
+
+#Q6
+```{r}
+candy_numeric_rating <- candy %>% 
+  mutate(rating = case_when(
+    rating == "JOY" ~ 1,
+    rating == "MEH" ~ 0,
+    TRUE ~ -1
+  ))
+```
+
+```{r}
+candy_numeric_rating %>% 
+  group_by(candy, gender) %>%
+  summarise(popularity = sum(rating), .groups = "drop") %>% 
+  group_by(gender) %>% 
+  slice_max(popularity, with_ties = TRUE)
+```
+
+#Q7
+```{r}
+candy_numeric_rating %>% 
+  group_by(candy, year) %>%
+  summarise(popularity = sum(rating), .groups = "drop") %>% 
+  group_by(year) %>% 
+  slice_max(popularity, with_ties = TRUE)
+```
+
+#Q8
+```{r}
+candy_numeric_rating %>% 
+  mutate(country = case_when(
+    country %in% c("usa", "uk", "canada") ~ country,
+    TRUE ~ "other"
+  )) %>% 
+  group_by(candy, country) %>%
+  summarise(popularity = sum(rating), .groups = "drop") %>% 
+  group_by(country) %>% 
+  slice_max(popularity, with_ties = TRUE)
+```
+

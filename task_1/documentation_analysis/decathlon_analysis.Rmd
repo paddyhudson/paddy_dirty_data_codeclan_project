@@ -1,0 +1,62 @@
+---
+title: "Decathlon Analysis"
+output: html_notebook
+---
+
+#Load libraries
+```{r}
+library(tidyverse)
+library(here)
+```
+
+#Read in cleaned data
+```{r}
+decathlon <- read_csv(here("clean_data/decathlon_clean.csv"))
+```
+
+#Q1
+```{r}
+decathlon %>% 
+  filter(event == "long_jump") %>% 
+  slice_max(result)
+```
+
+#Q2
+```{r}
+decathlon %>% 
+  filter(event == "100m") %>% 
+  group_by(competition) %>% 
+  summarise(avg_100m_time = mean(result))
+```
+#Q3
+```{r}
+decathlon %>% 
+  group_by(name) %>%
+  filter(event == "100m") %>% 
+  summarise(total_points = sum(points)) %>%
+  slice_max(total_points)
+```
+
+#Q4
+```{r}
+decathlon %>% 
+  filter(event == "shot_put") %>% 
+  group_by(competition) %>% 
+  slice_max(result, n = 3) %>%
+  select(competition, result) %>% 
+  ungroup()
+```
+
+#Q5
+```{r}
+decathlon %>% 
+  filter(event == "400m") %>% 
+  mutate(flag = if_else(
+    result < 50,
+    "400m_sub_50s",
+    "400m_over_50s"
+  )) %>% 
+  group_by(flag) %>% 
+  summarise(avg_points = mean(points))
+```
+
